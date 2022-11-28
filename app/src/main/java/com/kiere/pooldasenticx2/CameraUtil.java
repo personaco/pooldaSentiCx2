@@ -77,8 +77,9 @@ public class CameraUtil {
     }
 
     public static void captureImage(Context context, PreviewView viewFinder){
-        SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-        File file = new File(getBatchDirectoryName(), mDateFormat.format(new Date())+ ".jpg");
+//        SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
+//        File file = new File(getBatchDirectoryName(), mDateFormat.format(new Date())+ ".jpg");
+        File file = new File(context.getExternalCacheDir() + File.separator + System.currentTimeMillis() + ".jpg");
 
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(file).build();
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback () {
@@ -106,18 +107,6 @@ public class CameraUtil {
                 error.printStackTrace();
             }
         });
-    }
-
-    public static String getBatchDirectoryName() {
-
-        String app_folder_path = "";
-        app_folder_path = Environment.getExternalStorageDirectory().toString() + "/images";
-        File dir = new File(app_folder_path);
-        if (!dir.exists() && !dir.mkdirs()) {
-
-        }
-
-        return app_folder_path;
     }
 
 
