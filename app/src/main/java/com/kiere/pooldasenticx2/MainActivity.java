@@ -15,12 +15,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-    private Executor executor = Executors.newSingleThreadExecutor();
+    private final Executor executor = Executors.newSingleThreadExecutor();
     private int REQUEST_CODE_PERMISSIONS = 1001;
-    private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE"};
+    private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA"};
 
     PreviewView mPreviewView;
     ImageView captureImage;
+    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImg);
+        imageView =findViewById(R.id.imageView);
 
         if(allPermissionsGranted()){
             CameraUtil.startCamera(this, mPreviewView); //start camera if permission has been granted by user
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 캡쳐 이미지
         captureImage.setOnClickListener(v -> {
-           CameraUtil.captureImage(this,mPreviewView);
+           CameraUtil.captureImage(this,mPreviewView, imageView);
         });
     }
 

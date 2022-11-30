@@ -3,11 +3,12 @@ package com.kiere.pooldasenticx2;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,12 +25,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+// 이미지 업로드 및 리턴값 처리
+import com.kiere.pooldasenticx2.NetworkRelatedClass.NetworkCall;
 
 public class CameraUtil {
     private static final Executor executor = Executors.newSingleThreadExecutor();
@@ -58,6 +59,9 @@ public class CameraUtil {
                         .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
                         .build();
 
+                // init camera
+                cameraProvider.unbindAll();
+
                 // Attach use cases to the camera with the same lifecycle owner
                 cameraProvider.bindToLifecycle(
                         ((LifecycleOwner) context),
@@ -76,11 +80,8 @@ public class CameraUtil {
 
     }
 
-    public static void captureImage(Context context, PreviewView viewFinder){
-//        SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-//        File file = new File(getBatchDirectoryName(), mDateFormat.format(new Date())+ ".jpg");
+    public static void captureImage(Context context, PreviewView viewFinder, ImageView imageView){
         File file = new File(context.getExternalCacheDir() + File.separator + System.currentTimeMillis() + ".jpg");
-
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(file).build();
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback () {
             @Override
@@ -98,7 +99,15 @@ public class CameraUtil {
                         byte[] byteArrayImage = baos.toByteArray();
                         String encodedImage = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
 
-                        Log.d("bitmap",encodedImage);
+                        //Log.d("bitmap",encodedImage);
+                        Log.d("filePaht",file.getAbsolutePath());
+
+                        viewFinder.setVisibility(View.INVISIBLE);
+                        imageView.setVisibility(View.VISIBLE);
+                        imageView.setImageBitmap(bitmap);
+
+                        NetworkCall.fileUpload(file.getAbsolutePath());
+
                     }
                 });
             }
@@ -108,6 +117,5 @@ public class CameraUtil {
             }
         });
     }
-
 
 }
