@@ -33,7 +33,7 @@ android {
     sourceSets {
         main {
             java {
-                srcDirs 'src\\main\\java', 'src\\main\\java\\util', 'src\\main\\java\\NetworkRelatedClass', 'src\\main\\NetworkRelatedClass'
+                srcDirs 'src\\main\\java', 'src\\main\\java\\util', 'src\\main\\java\\NetworkRelatedClass', 'src\\main\\NetworkRelatedClass', 'src\\main\\java\\com\\kiere\\pooldasentiCx2\\NetworkRelatedClass'
             }
         }
     }
@@ -59,9 +59,7 @@ dependencies {
     implementation "androidx.camera:camera-extensions:1.0.0-alpha12"
 
     // networking library
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
     // JSON parsing, serialize-deserialize
     implementation 'com.google.code.gson:gson:2.8.9'

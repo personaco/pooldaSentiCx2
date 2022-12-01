@@ -29,9 +29,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-// 이미지 업로드 및 리턴값 처리
-import com.kiere.pooldasenticx2.NetworkRelatedClass.NetworkCall;
-
 public class CameraUtil {
     private static final Executor executor = Executors.newSingleThreadExecutor();
     private static ImageCapture imageCapture;
@@ -101,13 +98,15 @@ public class CameraUtil {
 
                         //Log.d("bitmap",encodedImage);
                         Log.d("filePaht",file.getAbsolutePath());
+                        Log.d("filePaht2",file.getPath());
+
 
                         viewFinder.setVisibility(View.INVISIBLE);
                         imageView.setVisibility(View.VISIBLE);
                         imageView.setImageBitmap(bitmap);
 
                         // 이미지 업로드 및 결과값 리턴
-                        NetworkCall.fileUpload(file.getAbsolutePath());
+                        NetworkCall.fileUpload(file);
 
                     }
                 });
