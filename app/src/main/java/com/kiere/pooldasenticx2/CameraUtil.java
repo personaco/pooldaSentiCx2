@@ -106,6 +106,7 @@ public class CameraUtil {
                         imageView.setVisibility(View.VISIBLE);
                         imageView.setImageBitmap(bitmap);
 
+                        // 이미지 업로드 및 결과값 리턴
                         NetworkCall.fileUpload(file.getAbsolutePath());
 
                     }
