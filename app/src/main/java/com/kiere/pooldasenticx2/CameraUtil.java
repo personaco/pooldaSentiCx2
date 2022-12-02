@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 public class CameraUtil {
     private static final Executor executor = Executors.newSingleThreadExecutor();
     private static ImageCapture imageCapture;
+    public static String sentiResult = "init_cameraUtl";
 
     public static void startCamera(Context context,PreviewView viewFinder) {
 
@@ -77,7 +78,7 @@ public class CameraUtil {
 
     }
 
-    public static void captureImage(Context context, PreviewView viewFinder, ImageView imageView){
+    public static String captureImage(Context context, PreviewView viewFinder, ImageView imageView){
         File file = new File(context.getExternalCacheDir() + File.separator + System.currentTimeMillis() + ".jpg");
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(file).build();
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback () {
@@ -88,25 +89,13 @@ public class CameraUtil {
                     public void run() {
                         Toast.makeText(context, "Image Saved successfully", Toast.LENGTH_SHORT).show();
 
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inPreferredConfig = Bitmap.Config.RGB_565;
-                        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
-                        byte[] byteArrayImage = baos.toByteArray();
-                        String encodedImage = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
-
-                        //Log.d("bitmap",encodedImage);
-                        Log.d("filePaht",file.getAbsolutePath());
-                        Log.d("filePaht2",file.getPath());
-
-
                         viewFinder.setVisibility(View.INVISIBLE);
                         imageView.setVisibility(View.VISIBLE);
-                        imageView.setImageBitmap(bitmap);
+                        //imageView.setImageBitmap(bitmap);
 
                         // 이미지 업로드 및 결과값 리턴
-                        NetworkCall.fileUpload(file);
+                        sentiResult = NetworkCall.getSentiResult(file);
+                        Log.d("onImageSave",sentiResult);
 
                     }
                 });
@@ -116,6 +105,9 @@ public class CameraUtil {
                 error.printStackTrace();
             }
         });
+
+        Log.d("onImageSave return",sentiResult);
+        return sentiResult;
     }
 
 }

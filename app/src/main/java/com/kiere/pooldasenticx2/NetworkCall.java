@@ -2,6 +2,10 @@ package com.kiere.pooldasenticx2;
 
 import android.util.Log;
 import androidx.annotation.NonNull;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.io.File;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -14,13 +18,17 @@ import okhttp3.Call;
 import okhttp3.Callback;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NetworkCall {
-    static String url = "https://www.bottalks.co.kr/?m=bbs&a=get_sentiResult"; // TODO: Replace URL
-
+    static String url = "https://www.bottalks.co.kr/?m=bbs&a=get_sentiResult";
     static OkHttpClient client = new OkHttpClient();
+    static Gson gson = new Gson();
 
-    public static void fileUpload(File file) {
+    public static Map<String,String> fileUpload(File file) {
+        String reqResult = "false";
+        String sentiResult = "null";
 
         RequestBody fileBody = RequestBody.create(file, MediaType.parse("image/jpeg"));
         MultipartBody multipartBody = new MultipartBody.Builder()
@@ -32,24 +40,46 @@ public class NetworkCall {
                 .addHeader("Authorization","Persona_AK 9cda130decb7a810713b2f9e18ceb03e")
                 .build();
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response)
-                    throws IOException {
+        // 동기식으로 보낸다
+        try {
+            Response response = client.newCall(request).execute();
+            if(response.isSuccessful()){
                 ResponseBody body = response.body();
                 if (body != null) {
-                    String res = body.string();
-                    Log.v("RESPONSE", res);
+                    String sentiResponse = body.string();
+                    Log.v("RESPONSE", sentiResponse);
+                    reqResult = "true";
+                    sentiResult = sentiResponse;
+                    body.close();
                 } else {
-                    Log.e("ERROR", "Failed to upload");
+                    String fail_msg = "Response Body is null";
+                    Log.e("ERROR", fail_msg);
+                    reqResult = "false";
+                    sentiResult = fail_msg;
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            reqResult = "false";
+            sentiResult = "Fail to upload";
 
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e("ERROR", "Failed to upload");
-            }
-        });
+        }
+        Map<String,String> result = new HashMap<String,String>();
+        result.put("reqResult", reqResult);
+        result.put("sentiResult",sentiResult);
+        return result;
+    }
+
+    // 감정분석 결과값 리턴 : 사진외에 영상으로 할 수도 있어서 별도 메서드로 처리
+    public static String getSentiResult(File file){
+         Map<String,String> fileUploadResult = fileUpload(file);
+         String reqResult = fileUploadResult.get("reqResult");
+         String sentiResult = fileUploadResult.get("sentiResult");
+
+         Log.d("fileUploadResult", String.valueOf(fileUploadResult));
+         Log.d("reqResult",reqResult);
+
+         return sentiResult; // json 형태 그래도 넘겨서 webview 에서 처리하도록
     }
 
 }

@@ -2,6 +2,8 @@ package com.kiere.pooldasenticx2;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.StrictMode;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -18,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private final Executor executor = Executors.newSingleThreadExecutor();
     private int REQUEST_CODE_PERMISSIONS = 1001;
     private final String[] REQUIRED_PERMISSIONS = new String[]{"android.permission.CAMERA"};
+    public static String captureResult ="init";
 
     PreviewView mPreviewView;
     ImageView captureImage;
@@ -27,6 +30,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* okhttp 동기전송시 Error 해결
+           StrictMode$AndroidBlockGuardPolicy.onNetwork [duplicate]
+           Thread 이슈
+        */
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         mPreviewView = findViewById(R.id.previewView);
         captureImage = findViewById(R.id.captureImg);
@@ -40,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
 
         // 캡쳐 이미지
         captureImage.setOnClickListener(v -> {
-           CameraUtil.captureImage(this,mPreviewView, imageView);
+           captureResult = CameraUtil.captureImage(this,mPreviewView, imageView);
+           Log.d("captureResult",captureResult);
         });
     }
 
