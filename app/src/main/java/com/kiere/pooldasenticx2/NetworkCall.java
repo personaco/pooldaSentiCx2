@@ -70,16 +70,52 @@ public class NetworkCall {
         return result;
     }
 
+    public static void sendPhotoToReqServer(File file) {
+        String reqResult = "false";
+        String sentiResult = "null";
+
+        RequestBody fileBody = RequestBody.create(file, MediaType.parse("image/jpeg"));
+        MultipartBody multipartBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", file.getName(), fileBody).build();
+
+        Request request = new Request.Builder().url(url).post(multipartBody)
+                .addHeader("Content-Type","multipart/form-data")
+                .addHeader("Authorization","Persona_AK 9cda130decb7a810713b2f9e18ceb03e")
+                .build();
+
+        // 동기식으로 보낸다
+        try {
+            Response response = client.newCall(request).execute();
+            if(response.isSuccessful()){
+                ResponseBody body = response.body();
+                if (body != null) {
+                    String sentiResponse = body.string();
+                    Log.v("RESPONSE", sentiResponse);
+                    reqResult = "true";
+                    sentiResult = sentiResponse;
+                    body.close();
+                } else {
+                    String fail_msg = "Response Body is null";
+                    Log.e("ERROR", fail_msg);
+                    reqResult = "false";
+                    sentiResult = fail_msg;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            reqResult = "false";
+            sentiResult = "Fail to upload";
+
+        }
+
+    }
+
     // 감정분석 결과값 리턴 : 사진외에 영상으로 할 수도 있어서 별도 메서드로 처리
-    public static String getSentiResult(File file){
+    public static Map<String,String> getSentiResult(File file){
          Map<String,String> fileUploadResult = fileUpload(file);
-         String reqResult = fileUploadResult.get("reqResult");
-         String sentiResult = fileUploadResult.get("sentiResult");
 
-         Log.d("fileUploadResult", String.valueOf(fileUploadResult));
-         Log.d("reqResult",reqResult);
-
-         return sentiResult; // json 형태 그래도 넘겨서 webview 에서 처리하도록
+         return fileUploadResult;
     }
 
 }

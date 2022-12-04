@@ -8,6 +8,8 @@ import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.webkit.ValueCallback;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -25,6 +27,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -78,7 +81,7 @@ public class CameraUtil {
 
     }
 
-    public static String captureImage(Context context, PreviewView viewFinder, ImageView imageView){
+    public static void captureImage(Context context, PreviewView viewFinder, WebView webView){
         File file = new File(context.getExternalCacheDir() + File.separator + System.currentTimeMillis() + ".jpg");
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(file).build();
         imageCapture.takePicture(outputFileOptions, executor, new ImageCapture.OnImageSavedCallback () {
@@ -89,13 +92,29 @@ public class CameraUtil {
                     public void run() {
                         Toast.makeText(context, "Image Saved successfully", Toast.LENGTH_SHORT).show();
 
-                        viewFinder.setVisibility(View.INVISIBLE);
-                        imageView.setVisibility(View.VISIBLE);
+                        //viewFinder.setVisibility(View.INVISIBLE);
+                        // imageView.setVisibility(View.VISIBLE);
                         //imageView.setImageBitmap(bitmap);
 
                         // 이미지 업로드 및 결과값 리턴
-                        sentiResult = NetworkCall.getSentiResult(file);
-                        Log.d("onImageSave",sentiResult);
+                        Map<String,String> sentiResultMap = NetworkCall.getSentiResult(file);
+                        String reqResult = sentiResultMap.get("reqResult");
+                        String sentiResult = sentiResultMap.get("sentiResult");
+
+                        Log.d("sentiResultMap", String.valueOf(sentiResultMap));
+                        Log.d("reqResult",reqResult);
+                        Log.d("sentiResult",sentiResult);
+                        if(reqResult == "true"){
+                           webView.evaluateJavascript("javascript:callFromApp("+sentiResult+")", new ValueCallback<String>() {
+                              @Override
+                              public void onReceiveValue(String toast) {
+                                Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
+                              }
+                           });
+
+                           // 감정분석 요청한 서버에 사진전송
+                           NetworkCall.sendPhotoToReqServer(file);
+                        }
 
                     }
                 });
@@ -106,8 +125,6 @@ public class CameraUtil {
             }
         });
 
-        Log.d("onImageSave return",sentiResult);
-        return sentiResult;
     }
 
 }
