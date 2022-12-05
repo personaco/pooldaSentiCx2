@@ -11,6 +11,8 @@ import android.view.KeyEvent;
 import android.webkit.WebSettings;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -24,6 +26,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -99,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
                 super.onPageFinished(webView, url);
                 Log.d("onPageFinished", "success" );
 
-                testJavaCallJs();
-                capturePhoto();
+                //testJavaCallJs();
+                //capturePhoto();
             }
 
             @Override
@@ -133,11 +138,24 @@ public class MainActivity extends AppCompatActivity {
             mContext = c;
         }
 
-        /** Show a toast from the web page */
+        /** Call from the web page : 웹에서 호출처리 함수 */
         @JavascriptInterface
-        public void showToast(String toast) {
-            Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
-        }
+        public void callFromWeb(String jsonStr) {
+            try {
+                JSONObject jObj = new JSONObject(jsonStr);
+                String obj = jObj.getString("obj");
+                String req = jObj.getString("req");
+                if(obj.equals("camera")){
+                    if(req.equals("init")) initCamera();
+                    else if(req.equals("capture")) capturePhoto();
+                }
+
+            } catch (JSONException e) {
+                Log.e("MYAPP", "unexpected JSON exception", e);
+            }
+
+
+       }
     }
 
     // 카메라 초기화

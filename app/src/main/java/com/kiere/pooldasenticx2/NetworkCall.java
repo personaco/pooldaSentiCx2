@@ -22,10 +22,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NetworkCall {
-    static String url = "https://www.bottalks.co.kr/?m=bbs&a=get_sentiResult";
+    static final String url_senti = "https://www.bottalks.co.kr/?m=bbs&a=get_sentiResult"; // 감정분석 서버
+    static final String url_clitent = "http://studyeng.peso.co.kr/api/saveSentiPhoto"; // 감정분석 요청 client
     static OkHttpClient client = new OkHttpClient();
     static Gson gson = new Gson();
 
+    // 감정분석 서버에 파일 전송
     public static Map<String,String> fileUpload(File file) {
         String reqResult = "false";
         String sentiResult = "null";
@@ -35,7 +37,7 @@ public class NetworkCall {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("file", file.getName(), fileBody).build();
 
-        Request request = new Request.Builder().url(url).post(multipartBody)
+        Request request = new Request.Builder().url(url_senti).post(multipartBody)
                 .addHeader("Content-Type","multipart/form-data")
                 .addHeader("Authorization","Persona_AK 9cda130decb7a810713b2f9e18ceb03e")
                 .build();
@@ -70,44 +72,34 @@ public class NetworkCall {
         return result;
     }
 
+    // 감정분석 요청한 서버에게 원본파일 전송
     public static void sendPhotoToReqServer(File file) {
-        String reqResult = "false";
-        String sentiResult = "null";
 
         RequestBody fileBody = RequestBody.create(file, MediaType.parse("image/jpeg"));
         MultipartBody multipartBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("file", file.getName(), fileBody).build();
 
-        Request request = new Request.Builder().url(url).post(multipartBody)
-                .addHeader("Content-Type","multipart/form-data")
-                .addHeader("Authorization","Persona_AK 9cda130decb7a810713b2f9e18ceb03e")
-                .build();
+        Request request = new Request.Builder().url(url_clitent).post(multipartBody).build();
 
-        // 동기식으로 보낸다
-        try {
-            Response response = client.newCall(request).execute();
-            if(response.isSuccessful()){
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response)
+                    throws IOException {
                 ResponseBody body = response.body();
                 if (body != null) {
-                    String sentiResponse = body.string();
-                    Log.v("RESPONSE", sentiResponse);
-                    reqResult = "true";
-                    sentiResult = sentiResponse;
-                    body.close();
+                    String res = body.string();
+                    Log.v("sendPhoto", res);
                 } else {
-                    String fail_msg = "Response Body is null";
-                    Log.e("ERROR", fail_msg);
-                    reqResult = "false";
-                    sentiResult = fail_msg;
+                    Log.e("ERROR_sendPhoto", "Failed to upload");
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            reqResult = "false";
-            sentiResult = "Fail to upload";
 
-        }
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e("ERROR", "Failed to upload");
+            }
+        });
 
     }
 

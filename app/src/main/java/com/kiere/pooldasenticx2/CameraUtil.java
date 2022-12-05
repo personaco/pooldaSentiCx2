@@ -90,7 +90,7 @@ public class CameraUtil {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(context, "Image Saved successfully", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(context, "Image Saved successfully", Toast.LENGTH_SHORT).show();
 
                         //viewFinder.setVisibility(View.INVISIBLE);
                         // imageView.setVisibility(View.VISIBLE);
@@ -113,7 +113,7 @@ public class CameraUtil {
                            });
 
                            // 감정분석 요청한 서버에 사진전송
-                           NetworkCall.sendPhotoToReqServer(file);
+                           //NetworkCall.sendPhotoToReqServer(file);
                         }
 
                     }
