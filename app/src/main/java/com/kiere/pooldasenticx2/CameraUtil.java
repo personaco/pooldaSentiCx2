@@ -1,5 +1,7 @@
 package com.kiere.pooldasenticx2;
 
+import static android.app.PendingIntent.getActivity;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,6 +30,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -94,27 +97,29 @@ public class CameraUtil {
 
                         //viewFinder.setVisibility(View.INVISIBLE);
                         // imageView.setVisibility(View.VISIBLE);
-                        //imageView.setImageBitmap(bitmap);
+
+                        NetworkCall.sendSentiResult(webView,file);
 
                         // 이미지 업로드 및 결과값 리턴
-                        Map<String,String> sentiResultMap = NetworkCall.getSentiResult(file);
-                        String reqResult = sentiResultMap.get("reqResult");
-                        String sentiResult = sentiResultMap.get("sentiResult");
-
-                        Log.d("sentiResultMap", String.valueOf(sentiResultMap));
-                        Log.d("reqResult",reqResult);
-                        Log.d("sentiResult",sentiResult);
-                        if(reqResult == "true"){
-                           webView.evaluateJavascript("javascript:callFromApp("+sentiResult+")", new ValueCallback<String>() {
-                              @Override
-                              public void onReceiveValue(String toast) {
-                                Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
-                              }
-                           });
-
-                           // 감정분석 요청한 서버에 사진전송
-                           //NetworkCall.sendPhotoToReqServer(file);
-                        }
+//                        Map<String,String> sentiResultMap = NetworkCall.getSentiResult(file);
+//                        String reqResult = sentiResultMap.get("reqResult");
+//                        String sentiResult = sentiResultMap.get("sentiResult");
+//
+//                        Log.d("sentiResultMap", String.valueOf(sentiResultMap));
+//                        Log.d("reqResult",reqResult);
+//                        Log.d("sentiResult",sentiResult);
+//
+//                        if(Objects.equals(reqResult, "true")){
+//                           webView.evaluateJavascript("javascript:callFromApp("+sentiResult+")", new ValueCallback<String>() {
+//                              @Override
+//                              public void onReceiveValue(String toast) {
+//                                Toast.makeText(context, toast, Toast.LENGTH_SHORT).show();
+//                              }
+//                           });
+//
+//                           // 감정분석 요청한 서버에 사진전송
+//                           //NetworkCall.sendPhotoToReqServer(file);
+//                        }
 
                     }
                 });

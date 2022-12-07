@@ -30,11 +30,13 @@ import androidx.core.content.ContextCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-    private WebView webView;
+    private static WebView webView;
     private WebSettings webViewSetting;
     private final Executor executor = Executors.newSingleThreadExecutor();
     private int REQUEST_CODE_PERMISSIONS = 1001;
@@ -130,6 +132,18 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // 웹 호출 함수
+    public static void callWebFromApp(String str){
+         //webview thread 충돌회피 > post 사용
+         webView.post(() -> webView.evaluateJavascript("javascript:callFromApp("+str+")", new ValueCallback<String>() {
+             @Override
+             public void onReceiveValue(String toast) {
+                 //Toast.makeText(webView.getContext(), toast, Toast.LENGTH_SHORT).show();
+             }
+
+         }));
+    }
+
     public class WebAppInterface {
         Context mContext;
 
@@ -143,11 +157,20 @@ public class MainActivity extends AppCompatActivity {
         public void callFromWeb(String jsonStr) {
             try {
                 JSONObject jObj = new JSONObject(jsonStr);
-                String obj = jObj.getString("obj");
-                String req = jObj.getString("req");
-                if(obj.equals("camera")){
-                    if(req.equals("init")) initCamera();
-                    else if(req.equals("capture")) capturePhoto();
+                String obj = jObj.getString("obj"); // 대상
+                String req = jObj.getString("req"); // 요청사항
+                String msg = jObj.getString("msg"); // msg
+
+                switch (obj) {
+                    case "camera":
+                        if (Objects.equals(req, "init")) initCamera(); // 카메라 초기화
+                        break;
+                    case "user":
+                        if (Objects.equals(req, "senti")) doSentiAnalysis(); // 감정분석 처리
+                        break;
+                    case "app":
+                        if (Objects.equals(req, "sysCheck")) appSysCheck(msg); // 감정분석 처리
+                        break;
                 }
 
             } catch (JSONException e) {
@@ -158,6 +181,12 @@ public class MainActivity extends AppCompatActivity {
        }
     }
 
+    // app system 환경체크
+    private void appSysCheck(String msg){
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        Log.d("appSysCheck",msg);
+    }
+
     // 카메라 초기화
     private void initCamera(){
         if(allPermissionsGranted()){
@@ -165,11 +194,17 @@ public class MainActivity extends AppCompatActivity {
         } else{
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
+        //Toast.makeText(this, "call initCamera.", Toast.LENGTH_SHORT).show();
+        Log.d("call_initCamera","yes");
     }
 
-    // 캡쳐 사진
-    private void capturePhoto(){
+    // 감정분석 처리
+    private void doSentiAnalysis(){
         CameraUtil.captureImage(this, mPreviewView, webView);
+
+        Log.d("call_doSentiAnalysis","yes");
+        Toast.makeText(this, "call doSentiAnalysis.", Toast.LENGTH_SHORT).show();
+
     }
 
     private boolean allPermissionsGranted(){

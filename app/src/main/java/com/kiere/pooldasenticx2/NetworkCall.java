@@ -1,6 +1,11 @@
 package com.kiere.pooldasenticx2;
 
+import android.webkit.ValueCallback;
+import android.content.Context;
 import android.util.Log;
+import android.webkit.WebView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
@@ -17,6 +22,9 @@ import okhttp3.ResponseBody;
 import okhttp3.Call;
 import okhttp3.Callback;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +74,7 @@ public class NetworkCall {
             sentiResult = "Fail to upload";
 
         }
-        Map<String,String> result = new HashMap<String,String>();
+        Map<String,String> result = new HashMap<>();
         result.put("reqResult", reqResult);
         result.put("sentiResult",sentiResult);
         return result;
@@ -89,7 +97,79 @@ public class NetworkCall {
                 ResponseBody body = response.body();
                 if (body != null) {
                     String res = body.string();
+
                     Log.v("sendPhoto", res);
+                } else {
+                    Log.e("ERROR_sendPhoto", "Failed to upload");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e("ERROR", "Failed to upload");
+            }
+        });
+
+    }
+
+    // 감정분석 요청한 서버에게 감정분석 결과값 전송 : webview js 방식 사용
+    public static void sendSentiResult(WebView webView, File file) {
+
+        RequestBody fileBody = RequestBody.create(file, MediaType.parse("image/jpeg"));
+        MultipartBody multipartBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", file.getName(), fileBody).build();
+
+        Request request = new Request.Builder().url(url_senti).post(multipartBody)
+                .addHeader("Content-Type","multipart/form-data")
+                .addHeader("Authorization","Persona_AK 9cda130decb7a810713b2f9e18ceb03e")
+                .build();
+
+        // 비동기로 전송
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response)
+                    throws IOException {
+                ResponseBody body = response.body();
+                if (body != null) {
+                     String sentiResult = body.string();
+
+                     Log.d("senti_apiResult",sentiResult);
+
+                     // api 결과 매핑
+                     JSONObject apiResult = new JSONObject();
+                    try {
+                        apiResult.put("obj", "user");
+                        apiResult.put("req", "senti");
+                        apiResult.put("result",sentiResult);
+                    } catch (JSONException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+
+                     // 최종 리턴값
+                     String apiResult_jsonStr = apiResult.toString();
+                     Log.d("apiResult_jsonStr", apiResult_jsonStr);
+
+                     MainActivity.callWebFromApp(apiResult_jsonStr);
+                     //Toast.makeText(webView.getContext(), apiResult_jsonStr, Toast.LENGTH_SHORT).show();
+
+                     // webview thread 회피
+//                     webView.post(() -> webView.evaluateJavascript("javascript:callFromApp("+apiResult_jsonStr+")", new ValueCallback<String>() {
+//                         @Override
+//                         public void onReceiveValue(String toast) {
+//                             //Toast.makeText(webView.getContext(), toast, Toast.LENGTH_SHORT).show();
+//                         }
+//
+//                     }));
+
+//                    webView.evaluateJavascript("javascript:callFromApp("+apiResult_jsonStr+")", new ValueCallback<String>() {
+//                        @Override
+//                        public void onReceiveValue(String value) {
+//
+//                        }
+//                    });
+                  Log.v("sentiResult", sentiResult);
                 } else {
                     Log.e("ERROR_sendPhoto", "Failed to upload");
                 }
