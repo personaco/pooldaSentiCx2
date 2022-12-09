@@ -132,29 +132,27 @@ public class NetworkCall {
                     throws IOException {
                 ResponseBody body = response.body();
                 if (body != null) {
-                     String sentiResult = body.string();
+                    String sentiResult = body.string();
 
-                     Log.d("senti_apiResult",sentiResult);
-
-                     // api 결과 매핑
-                     JSONObject apiResult = new JSONObject();
+                    // api 결과 매핑
+                    JSONObject apiResult = new JSONObject();
                     try {
                         apiResult.put("obj", "user");
                         apiResult.put("req", "senti");
-                        apiResult.put("result",sentiResult);
+                        apiResult.put("result", sentiResult);
                     } catch (JSONException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
 
-                     // 최종 리턴값
-                     String apiResult_jsonStr = apiResult.toString();
-                     Log.d("apiResult_jsonStr", apiResult_jsonStr);
+                    // 최종 리턴값
+                    String apiResult_jsonStr = apiResult.toString();
+                    Log.d("apiResult_jsonStr", apiResult_jsonStr);
 
-                     MainActivity.callWebFromApp(apiResult_jsonStr);
-                     //Toast.makeText(webView.getContext(), apiResult_jsonStr, Toast.LENGTH_SHORT).show();
+                    MainActivity.callWebFromApp(apiResult_jsonStr);
+                    //Toast.makeText(webView.getContext(), apiResult_jsonStr, Toast.LENGTH_SHORT).show();
 
-                     // webview thread 회피
+                    // webview thread 회피
 //                     webView.post(() -> webView.evaluateJavascript("javascript:callFromApp("+apiResult_jsonStr+")", new ValueCallback<String>() {
 //                         @Override
 //                         public void onReceiveValue(String toast) {
@@ -169,7 +167,7 @@ public class NetworkCall {
 //
 //                        }
 //                    });
-                  Log.v("sentiResult", sentiResult);
+                    Log.v("sentiResult", sentiResult);
                 } else {
                     Log.e("ERROR_sendPhoto", "Failed to upload");
                 }
