@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -56,6 +57,7 @@ public class CameraUtil {
                 // Set up the capture use case to allow users to take photos
                 imageCapture = new ImageCapture.Builder()
                         .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .setTargetResolution(new Size(1080, 1920))
                         .build();
 
                 // Choose the camera by requiring a lens facing

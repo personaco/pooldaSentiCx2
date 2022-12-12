@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         CameraUtil.captureImage(this, mPreviewView, webView);
 
         Log.d("call_doSentiAnalysis","yes");
-        Toast.makeText(this, "call doSentiAnalysis.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "감정분석이 시작되었습니다.", Toast.LENGTH_SHORT).show();
 
     }
 
